@@ -1,0 +1,134 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<style>
+    .celda-colision {
+        background-color: #ff4d4d !important;
+        animation: parpadeo 0.5s 3;
+    }
+    @keyframes parpadeo {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    .mensaje-colision {
+        color: #d9534f;
+        font-size: 0.8rem;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+    .grupo-container {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    .grupo-container h5 {
+        background-color: #f8f9fa;
+        padding: 8px;
+        border-radius: 4px;
+    }
+</style>
+
+<form method="POST" action="{% url 'Crear_Horarios' balance.id %}" id="form-horarios">
+    {% csrf_token %}
+    
+    <h1 class="mb-4">Crear Horarios</h1>
+
+    <div class="alert alert-info">
+        <strong>Semana:</strong> {{ balance.numero_semana }} | 
+        <strong>Período:</strong> {{ balance.dia_inicio|date:"d/m/Y" }} al {{ balance.dia_fin|date:"d/m/Y" }}
+    </div>
+    <input type="hidden" name="semana" value="{{ balance.numero_semana }}">
+    <input type="hidden" name="balance_id" value="{{ balance.id }}">
+
+    <div class="table-responsive">
+        {% for grupo in grupos %}
+        <div class="grupo-container" data-grupo-id="{{ grupo.id }}">
+            <h5 data-codigo-grupo="{{ grupo.facultad }}{{ grupo.year }}0{{ grupo.grupo }}">
+                Grupo: {{ grupo.facultad }}{{ grupo.year }}0{{ grupo.grupo }}
+            </h5>
+            <input type="hidden" name="grupos[]" value="{{ grupo.id }}">
+
+            <table class="table table-bordered table-hover" style="border-color: #000000">
+                <thead class="thead-dark">
+                    <tr>
+                        <th style="width: 10%">Hora</th>
+                        <th style="width: 18%">Lunes</th>
+                        <th style="width: 18%">Martes</th>
+                        <th style="width: 18%">Miércoles</th>
+                        <th style="width: 18%">Jueves</th>
+                        <th style="width: 18%">Viernes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for clase in range_lista %}
+                    <tr>
+                        <td>{{ clase }}ª Clase</td>
+                        {% for dia in range_list %}
+                        <td data-clase="{{ clase }}" data-dia="{{ dia }}">
+                            <div class="contenido-celda">
+                                <select class="form-control form-control-sm mb-2" 
+                                        name="turnos[{{ grupo.id }}][{{ clase }}][{{ dia }}][asignatura]">
+                                    <option value="">Asignatura...</option>
+                                    {% for asignatura in asignaturas %}
+                                    <option value="{{ asignatura.id }}">{{ asignatura.siglas }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <select class="form-control form-control-sm mb-2" 
+                                        name="turnos[{{ grupo.id }}][{{ clase }}][{{ dia }}][tipo]">
+                                    <option value="">Tipo...</option>
+                                    {% for tipo in tipos_turno %}
+                                    <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <select class="form-control form-control-sm local-selector" 
+                                        name="turnos[{{ grupo.id }}][{{ clase }}][{{ dia }}][local]">
+                                    <option value="">Local...</option>
+                                    {% for local in locales %}
+                                    <option value="{{ local.id }}" 
+                                            data-nombre-local="{{ local.tipo }}-{{ local.piso }}{% if local.numero < 10 %}0{% endif %}{{ local.numero }}">
+                                        {{ local.tipo }}-{{ local.piso }}{% if local.numero < 10 %}0{% endif %}{{ local.numero }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mensaje-colision"></div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'Semanas' %}" class="btn btn-warning">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Guardar Horarios
+        </button>
+    </div>
+</form>
+<button>
+<!-- Mensajes del sistema -->
+{% if messages %}
+<div class="mt-4">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Incluir solo el JS principal -->
+<script src="{% static 'javascript/edicion/choque.js' %}"></script>
+{% endblock %}

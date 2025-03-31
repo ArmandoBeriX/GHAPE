@@ -1,0 +1,84 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<style>
+    .alert {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+
+<div class="container mt-4">
+    <h2>Confirmar Publicación de Horario</h2>
+    
+    {% if horario.publicado %}
+        <div class="alert alert-warning">
+            Desea retirar la publicación de este horario. Dejará de estar visible en la página principal.
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            Al publicar este horario quedará visible en la página principal. ¿Está seguro?
+        </div>
+    {% endif %}
+
+    <h4>Detalles del Horario:</h4>
+    <table class="table table-bordered text-center">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Turno</th>
+                <th scope="col">Hora</th>  
+                <th scope="col">Lunes</th>
+                <th scope="col">Martes</th>
+                <th scope="col">Miércoles</th>
+                <th scope="col">Jueves</th>
+                <th scope="col">Viernes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for clase in range_list %}
+            <tr>
+                <td>{{ clase }}ª</td>
+                <td>
+                    {% if clase == 1 %}8:00-9:20
+                    {% elif clase == 2 %}9:30-10:50
+                    {% elif clase == 3 %}11:00-12:20
+                    {% elif clase == 4 %}12:30-1:50
+                    {% elif clase == 5 %}2:00-3:20
+                    {% elif clase == 6 %}3:30-4:50
+                    {% endif %}
+                </td> 
+                {% for dia in range_lista %}
+                <td>
+                    {% with turno=None %}
+                        {% for t in horario.turnos.all %}
+                            {% if t.clase == clase and t.dia == dia %}
+                                {% with turno=t %}
+                                    <!-- Contenido de la celda -->
+                                    {{ turno.asignatura.siglas }} - {{ turno.asignatura.tipo }}<br />
+                                    {{ turno.local.tipo }} - Piso {{ turno.local.piso }} {{ turno.local.numero }}
+                                {% endwith %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if not turno %}
+                            <!-- Celda vacía -->
+                        {% endif %}
+                    {% endwith %}
+                </td> 
+                {% endfor %}
+            </tr> 
+            {% endfor %}
+        </tbody> 
+    </table>
+
+    <form method="POST" action="{% url 'Publicar_Horarios' horario.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">
+            {% if horario.publicado %}Des-Publicar{% else %}Publicar{% endif %}
+        </button>
+        <a href="{% url 'Semanas' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+
+</div>
+
+{% endblock %}

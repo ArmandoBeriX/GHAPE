@@ -1,0 +1,43 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Menú lateral -->
+        {% block lateral %}
+        <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+            <a href="{% url 'Selector' %}" class="btn btn-warning">Volver al Selector</a>
+            <hr>
+            <h4>Semanas Disponibles</h4>
+            
+            {% for balance in balances %}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        {% if is_admin %}
+                            Creador: {{ balance.creador.username }}
+                        {% else %}
+                            Semana {{ balance.numero_semana }}
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        
+                        <p class="card-text">Día de Inicio: {{ balance.dia_inicio|date:"d M Y" }}</p>
+                        <p class="card-text">Día de Fin: {{ balance.dia_fin|date:"d M Y" }}</p>
+                        <a href="{% url 'Listar_Horarios' balance.id %}" class="btn btn-primary">Ver Horarios</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </nav>
+        {% endblock %}
+        
+        <!-- Contenido principal -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            {% block horarios %}
+            <h1>Selecciona una Semana</h1>
+            <p>Elige una semana del menú lateral para ver más detalles.</p>
+            {% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}

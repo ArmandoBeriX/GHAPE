@@ -1,0 +1,155 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<!-- Estilos adicionales -->
+<style>
+    .celda-colision {
+        background-color: #ff4d4d !important; /* Rojo más intenso */
+        color: #ffffff !important; /* Texto en blanco para mejor contraste */
+    }
+    .mensaje-error {
+        color: #ff0000; /* Rojo puro para el mensaje */
+        font-size: 0.875rem; /* Tamaño de fuente pequeño */
+        margin-top: 0.5rem; /* Espaciado superior */
+        font-weight: bold; /* Texto en negrita */
+    }
+</style>
+
+<!-- Formulario para editar horarios -->
+<form method="POST" action="{% url 'Editar_Horarios' horario.id %}">
+    {% csrf_token %}
+    
+    <h1>Editar Horario</h1>
+
+    <div class="form-group">
+        <label>Grupo Seleccionado:</label>
+        <strong>{{ horario.grupo.facultad }} {{ horario.grupo.year }}0{{ horario.grupo.grupo }}</strong>
+    </div>
+
+    <div class="form-group">
+        <label>Semana:</label>
+        <strong>{{ horario.semana }}</strong>
+    </div>
+
+    {% if is_admin %}
+        <div class="form-group">
+            <label for="creador">Creador/Dueño:</label>
+            <select name="creador" id="creador" class="form-control mb-3">
+                {% for user in users %}
+                    <option value="{{ user.id }}" {% if user.id == horario.creador.id %}selected{% endif %}>{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead class="thead-light">
+                <tr>
+                    <th scope="col">Frecuencia</th>
+                    <th scope="col">Lunes</th>
+                    <th scope="col">Martes</th>
+                    <th scope="col">Miércoles</th>
+                    <th scope="col">Jueves</th>
+                    <th scope="col">Viernes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for clase in range_list %}
+                <tr>
+                    <td>{{ clase }}ª</td>
+                    {% for dia in range_lista %}
+                    <td>
+                        <!-- Tarjeta con selectores -->
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <!-- Selector de asignatura -->
+                                <div class="form-group">
+                                    <label for="asignatura-{{ horario.grupo.id }}-{{ clase }}-{{ dia }}"></label>
+                                    <select class="form-control mb-2" id="asignatura-{{ horario.grupo.id }}-{{ clase }}-{{ dia }}" name="turnos[{{ horario.grupo.id }}][{{ clase }}][{{ dia }}][asignatura]">
+                                        <option value="">Asignatura</option>
+                                        {% for asignatura in asignaturas %}
+                                            <option value="{{ asignatura.id }}"
+                                                {% for turno in turnos %}
+                                                    {% if turno.clase == clase and turno.dia == dia and turno.asignatura.id == asignatura.id %}selected{% endif %}
+                                                {% endfor %}
+                                            >
+                                                {{ asignatura.siglas }} - {{ asignatura.tipo }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Selector de tipo de turno -->
+                                <div class="form-group">
+                                    <label for="turno-{{ horario.grupo.id }}-{{ clase }}-{{ dia }}"></label>
+                                    <select class="form-control mb-2" id="turno-{{ horario.grupo.id }}-{{ clase }}-{{ dia }}" name="turnos[{{ horario.grupo.id }}][{{ clase }}][{{ dia }}][tipo]">
+                                        <option value="">Seleccione tipo de turno</option>
+                                        {% for tipo in tipos_turno %}
+                                            <option value="{{ tipo.0 }}"
+                                                {% for turno in turnos %}
+                                                    {% if turno.clase == clase and turno.dia == dia and turno.tipo == tipo.0 %}selected{% endif %}
+                                                {% endfor %}
+                                            >
+                                                {{ tipo.1 }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Selector de local -->
+                                <div class="form-group">
+                                    <label for="local-{{ horario.grupo.id }}-{{ clase }}-{{ dia }}"></label>
+                                    <select class="form-control" id="local-{{ horario.grupo.id }}-{{ clase }}-{{ dia }}" name="turnos[{{ horario.grupo.id }}][{{ clase }}][{{ dia }}][local]">
+                                        <option value="">Local</option>
+                                        {% for local in locales %}
+                                            <option value="{{ local.id }}"
+                                                {% for turno in turnos %}
+                                                    {% if turno.clase == clase and turno.dia == dia and turno.local.id == local.id %}selected{% endif %}
+                                                {% endfor %}
+                                            >
+                                                {% if local.numero >= 10 %}
+                                                    {{ local.tipo }} - {{ local.piso }}{{ local.numero }} <!-- Si el número del local es 10 o más, mostrarlo sin cero -->
+                                                {% else %}
+                                                    {{ local.tipo }} - {{ local.piso }}0{{ local.numero }} <!-- Si es menor a 10, mostrar con cero -->
+                                                {% endif %}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                            </div> <!-- Fin de card-body -->
+                        </div> <!-- Fin de tarjeta -->
+                    </td> 
+                    {% endfor %}
+                </tr> 
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Botón para guardar todas las selecciones -->
+        <button type="submit" class="btn btn-primary btn-block">Actualizar Horario</button> 
+    </div> <!-- Fin de table-responsive -->
+</form>
+
+<!-- Línea negra separadora -->
+<hr style="border-top: 2px solid black; margin: 20px 0;">
+
+<!-- Enlace para volver atrás -->
+<div class="text-center mt-4">
+    <a href="{% url 'Semanas' %}" class="btn btn-warning">Ir atrás</a>
+</div>
+
+<!-- Mostrar mensajes de error -->
+{% if messages %}
+    <div class="mt-4">
+        {% for message in messages %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Incluir el archivo JavaScript -->
+<script src="{% static 'javascript/edicion/choque.js' %}"></script>
+{% endblock %}
