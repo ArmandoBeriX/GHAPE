@@ -1,0 +1,78 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gestor de Horarios Académicos para Profesores y Estudiantes">
+    <title>Lista de Usuarios</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgb(0, 2, 89);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="https://eva.uci.cu/" style="color: rgb(231, 163, 18);">
+                Gestor de Horarios Académicos para Profesores y Estudiantes
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="ms-auto d-flex align-items-center">
+                    <span class="login me-3" style="color: rgb(80, 184, 37);">Estás navegando como: {{ user.username }}</span>
+                    <a href="{% url 'Salir' %}" class="btn btn-danger">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Lista de Usuarios</h1>
+            <a href="{% url 'Crear_Usuarios' %}" class="btn btn-success">Agregar Usuario</a>
+        </div>
+
+        {% if usuarios %}
+            <div class="table-responsive">
+                <table class="table table-striped w-100">
+                    <thead>
+                        <tr>
+                            <th>ID</th> <!-- Nueva columna para el ID -->
+                            <th>Nombre de Usuario</th>
+                            <th>Correo Electrónico</th>
+                            <th>Año</th> <!-- Nueva columna para el año -->
+                            <th>Estado</th>
+                            <th>Rol</th> <!-- Nueva columna para el grupo -->
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.id }}</td>  <!-- ID del usuario -->
+                            <td>{{ usuario.username }}</td>  <!-- Nombre de usuario -->
+                            <td>{{ usuario.email }}</td>      <!-- Correo electrónico -->
+                            <td>{{ usuario.año }}</td> <!-- Mostrar año o "No Asignado" -->
+                            <td>{% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}</td>  <!-- Estado del usuario -->
+                            <td>{% for group in usuario.groups %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td> <!-- Grupo(s) del usuario -->
+                            <td>
+                                <a href="{% url 'Editar_Usuarios' usuario.id %}" class="btn btn-warning btn-sm">Editar</a>
+                                <a href="{% url 'Quitar_Usuarios' usuario.id %}" class="btn btn-danger btn-sm">Eliminar</a> <!-- Corregido el tag url -->
+                                <a href="{% url 'Cambiar_Clave' usuario.id %}" class="btn btn-primary btn-sm">Cambiar Contraseña</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                No hay Usuarios disponibles.
+            </div>
+        {% endif %}
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
