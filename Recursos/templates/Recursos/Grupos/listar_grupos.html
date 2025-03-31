@@ -1,0 +1,58 @@
+{% extends 'Recursos/recursos.html' %}
+{% load static %}
+
+{% block recurso %}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1>Lista de Grupos</h1>
+        <a href="{% url 'Crear_Grupos' %}" class="btn btn-success">Agregar grupo</a>
+    </div>
+
+    {% if grupos %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Facultad</th>
+                    <th>Año</th>
+                    <th>Grupo</th>
+                    <th>IDF</th>
+                    <th>Matrícula</th>
+                    {% if is_admin %}
+                        <th>Creador</th>  <!-- Columna adicional para Administradores -->
+                    {% endif %}
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for grupo in grupos %}
+                <tr>
+                    <td>{{ grupo.facultad }}</td>
+                    <td>{{ grupo.year }}</td>
+                    <td>{{ grupo.grupo }}</td>
+                    <td>{{ grupo.facultad }}{{ grupo.year }}0{{ grupo.grupo }}</td>
+                    <td>{{ grupo.matricula }}</td>
+
+                    {% if is_admin %}
+                        <td>{{ grupo.creador.username }}</td>  <!-- Mostrar el creador solo para Administradores -->
+                    {% endif %}
+                    
+                    <td>
+                        <!-- Verificar si el usuario es el creador antes de mostrar los botones -->
+                        {% if is_admin or grupo.creador == request.user %}
+                        <a href="{% url 'Editar_Grupos' grupo.id %}" class="btn btn-warning">Editar</a>
+                        <a href="{% url 'Quitar_Grupos' grupo.id %}" class="btn btn-danger">Eliminar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No hay grupos disponibles.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
