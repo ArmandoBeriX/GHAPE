@@ -1,0 +1,50 @@
+{% extends 'Recursos/recursos.html' %}
+{% load static %}
+
+{% block recurso %}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1>Lista de Semanas Académicas</h1>
+        {% if is_admin %}
+            <a href="{% url 'Crear_Balances' %}" class="btn btn-success">Agregar Semana</a>
+        {% endif %}
+    </div>
+
+    {% if balances %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Número de Semana</th>
+                    <th>Día de Inicio</th>
+                    <th>Día de Fin</th>
+                    {% if is_admin %}
+                        <th>Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for balance in balances %}
+                <tr>
+                    <td>{{ balance.numero_semana }}</td>
+                    <td>{{ balance.dia_inicio|date:"d M Y" }}</td>  <!-- Formatear la fecha -->
+                    <td>{{ balance.dia_fin|date:"d M Y" }}</td>      <!-- Formatear la fecha -->
+
+                    {% if is_admin %}
+                        <td>
+                            <a href="{% url 'Editar_Balances' balance.id %}" class="btn btn-warning">Editar</a>
+                            <a href="{% url 'Quitar_Balances' balance.id %}" class="btn btn-danger">Eliminar</a>
+                        </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No hay semanas académicas disponibles.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

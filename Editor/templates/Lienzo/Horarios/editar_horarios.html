@@ -1,0 +1,171 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<style>
+    .celda-error {
+        background-color: #ffebee !important;
+        border: 2px solid #f44336 !important;
+    }
+    .select-error {
+        border: 1px solid #f44336 !important;
+    }
+    .mensaje-error {
+        color: #d32f2f;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-top: 4px;
+    }
+</style>
+
+<script>
+    window.CONFIG = {
+        semanaActual: {{ horario.semana }},
+        horarioId: {{ horario.id }},
+        turnosOcupados: {{ turnos_ocupados|safe }}
+    };
+</script>
+
+<form method="POST" id="form-horarios">
+    {% csrf_token %}
+    
+    <h1>Editar Horario - Semana {{ horario.semana }}</h1>
+
+    <div class="form-group">
+        <label>Grupo:</label>
+        <strong>{{ horario.grupo.facultad }}{{ horario.grupo.year }}0{{ horario.grupo.grupo }}</strong>
+    </div>
+
+    {% if is_admin %}
+    <div class="form-group">
+        <label for="creador">Creador:</label>
+        <select name="creador" id="creador" class="form-control">
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if user.id == horario.creador.id %}selected{% endif %}>{{ user.username }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+
+    <div class="table-responsive">
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr>
+                    <th>Hora</th>
+                    <th>Lunes</th>
+                    <th>Martes</th>
+                    <th>Miércoles</th>
+                    <th>Jueves</th>
+                    <th>Viernes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for clase in range_list %}
+                <tr>
+                    <td>{{ clase }}ª</td>
+                    {% for dia in range_lista %}
+                    <td data-dia="{{ dia }}" data-clase="{{ clase }}">
+                        <div class="card mb-3 {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}celda-error{% endif %}">
+                            <div class="card-body">
+                                <!-- Asignatura -->
+                                <select class="form-control mb-2 {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}select-error{% endif %}" 
+                                        name="turnos[{{ horario.grupo.id }}][{{ clase }}][{{ dia }}][asignatura]">
+                                    <option value="">Asignatura</option>
+                                    {% for asignatura in asignaturas %}
+                                        <option value="{{ asignatura.id }}"
+                                            {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}
+                                                {% if errores_por_celda.2.valores.asignatura == asignatura.id|stringformat:'i' %}selected{% endif %}
+                                            {% else %}
+                                                {% for turno in turnos %}
+                                                    {% if turno.clase == clase and turno.dia == dia and turno.asignatura.id == asignatura.id %}selected{% endif %}
+                                                {% endfor %}
+                                            {% endif %}>
+                                            {{ asignatura.siglas }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+
+                                <!-- Tipo de turno -->
+                                <select class="form-control mb-2 {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}select-error{% endif %}" 
+                                        name="turnos[{{ horario.grupo.id }}][{{ clase }}][{{ dia }}][tipo]">
+                                    <option value="">Tipo</option>
+                                    {% for tipo in tipos_turno %}
+                                        <option value="{{ tipo.0 }}"
+                                            {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}
+                                                {% if errores_por_celda.2.valores.tipo == tipo.0 %}selected{% endif %}
+                                            {% else %}
+                                                {% for turno in turnos %}
+                                                    {% if turno.clase == clase and turno.dia == dia and turno.tipo == tipo.0 %}selected{% endif %}
+                                                {% endfor %}
+                                            {% endif %}>
+                                            {{ tipo.1 }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+
+                                <!-- Local -->
+                                <select class="form-control local-selector {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}select-error{% endif %}" 
+                                        name="turnos[{{ horario.grupo.id }}][{{ clase }}][{{ dia }}][local]">
+                                    <option value="">Local</option>
+                                    {% for local in locales %}
+                                        <option value="{{ local.id }}"
+                                            {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}
+                                                {% if errores_por_celda.2.valores.local == local.id|stringformat:'i' %}selected{% endif %}
+                                            {% else %}
+                                                {% for turno in turnos %}
+                                                    {% if turno.clase == clase and turno.dia == dia and turno.local.id == local.id %}selected{% endif %}
+                                                {% endfor %}
+                                            {% endif %}>
+                                            {{ local.tipo }}-{{ local.piso }}{% if local.numero < 10 %}0{% endif %}{{ local.numero }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+
+                                {% if errores_por_celda and errores_por_celda.0 == clase|stringformat:'i' and errores_por_celda.1 == dia|stringformat:'i' %}
+                                    <div class="mensaje-error">{{ errores_por_celda.2.mensaje }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <a href="{% url 'Listar_Horarios' horario.balance.id %}" class="btn btn-secondary">
+            Cancelar
+        </a>
+        <button type="submit" class="btn btn-primary">
+            Guardar Cambios
+        </button>
+    </div>
+</form>
+
+<script src="{% static 'javascript/edicion/disponibilidad.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        initDisponibilidadVerification({{ horario.semana }}, {{ horario.id }});
+        
+        // Verificación inicial para valores precargados
+        document.querySelectorAll('.local-selector').forEach(selector => {
+            if (selector.value) {
+                setTimeout(() => {
+                    selector.dispatchEvent(new Event('change'));
+                }, 300);
+            }
+        });
+    });
+</script>
+
+{% if messages %}
+<div class="mt-4">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

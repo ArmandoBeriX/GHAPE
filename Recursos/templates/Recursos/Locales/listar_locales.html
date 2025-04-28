@@ -1,0 +1,56 @@
+{% extends 'Recursos/recursos.html' %}
+{% load static %}
+
+{% block recurso %}
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h1>Lista de Locales</h1>
+        <a href="{% url 'Crear_Locales' %}" class="btn btn-success">Agregar local</a>
+    </div>
+
+    {% if locales %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Piso</th>
+                    <th>Número</th>
+                    <th>Definición</th>
+                    {% if is_admin %}
+                        <th>Creador</th>  <!-- Columna adicional para Administradores -->
+                    {% endif %}
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for local in locales %}
+                <tr>
+                    <td>{{ local.tipo }}</td>
+                    <td>{{ local.piso }}</td>
+                    <td>{% if local.numero > 9 %}{{ local.tipo }}-{{ local.piso }}{{ local.numero }}{% else %}{{ local.tipo }}-{{ local.piso }}0{{ local.numero }}{% endif %}</td>
+                    <td>{{ local.tipo }}-{{ local.piso }}{% if local.numero > 9 %}{{ local.numero }}{% else %}0{{ local.numero }}{% endif %}</td>
+
+                    {% if is_admin %}
+                        <td>{{ local.creador.username }}</td>  <!-- Mostrar el creador solo para Administradores -->
+                    {% endif %}
+                    
+                    <td>
+                        <!-- Mostrar botones de acción -->
+                        {% if is_admin or local.creador == request.user %}
+                            <a href="{% url 'Editar_Locales' local.id %}" class="btn btn-warning">Editar</a>
+                            <a href="{% url 'Quitar_Locales' local.id %}" class="btn btn-danger">Eliminar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No hay locales disponibles.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

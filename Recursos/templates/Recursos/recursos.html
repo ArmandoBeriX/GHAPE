@@ -1,0 +1,33 @@
+{% extends 'Base/selector.html' %}
+
+{% block recursos %}
+<div class="container-fluid mt-5">
+    <div class="row justify-content-center">
+       
+        <div class="col-md-3 col-sm-12 text-center">
+            <a href={% url 'Selector' %} class="btn btn-warning">Volver al Selector</a>
+                <br>
+                {% block admin %}  
+            <h4>Recursos Académicos Disponibles</h4>
+            <div class="list-group text-center">
+                
+                <a href="{% url 'Listar_Asignaturas' %}" class="list-group-item list-group-item-action">Asignaturas</a>
+                <a href="{% url 'Listar_Profesores' %}" class="list-group-item list-group-item-action">Profesores</a>
+                <a href="{% url 'Listar_Locales' %}" class="list-group-item list-group-item-action">Locales</a>
+                <a href="{% url 'Listar_Grupos' %}" class="list-group-item list-group-item-action">Grupos</a>
+                <a href="{% url 'Listar_Balances' %}" class="list-group-item list-group-item-action">Balances de Carga</a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-md-9 col-sm-12 text-center">
+            <!-- a to add new entries -->
+            <div id="addaContainer" class="mt-4"></div>
+            <!-- Aquí puedes agregar más contenido según sea necesario -->
+            {% block recurso %}
+            {% endblock %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}

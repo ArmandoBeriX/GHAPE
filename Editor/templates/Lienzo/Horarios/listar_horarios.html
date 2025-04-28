@@ -1,0 +1,113 @@
+{% extends 'Base/listar_semanas.html' %}
+{% load static %}
+
+{% block horarios %}
+<style>
+    .semana-texto {
+        color: #28a745;
+    }
+</style>
+
+<div class="container mt-4">
+    
+        <div class="d-flex justify-content-between mb-4">
+            <a href="{% url 'Crear_Horarios' balance.id %}" class="btn btn-success">Crear Horario</a>
+        </div>
+   
+
+    <div style="border-top: 2px solid black; padding-top: 10px; margin-bottom: 20px;"></div>
+
+    <div class="row">
+        <!-- Contenido principal -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+            <h1>Horarios para la Semana {{ balance.numero_semana }}</h1>  
+
+            {% if horarios %}
+                {% for horario in horarios %}
+                    <div class="col-md-12 mb-3">  
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5>
+                                    Grupo {{ horario.grupo.facultad }} {{ horario.grupo.year }}0{{ horario.grupo.grupo }}
+                                    <span class="badge badge-info semana-texto ml-2">Semana: {{ horario.semana }}</span>
+                                </h5>
+                                <!-- Botones de acción -->
+                                <div>
+                                    {% if is_admin or horario.creador == request.user %}
+                                        {% if not horario.publicado %}
+                                            <a href="{% url 'Publicar_Horarios' horario.id %}" class="btn btn-success btn-sm">Publicar</a>
+                                        {% else %}
+                                            <a href="{% url 'Publicar_Horarios' horario.id %}" class="btn btn-secondary btn-sm">Des-Publicar</a>
+                                        {% endif %}
+                                        <a href="{% url 'Editar_Horarios' horario.id %}" class="btn btn-primary btn-sm">Editar</a>
+                                        <a href="{% url 'Eliminar_Horarios' horario.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-bordered text-center" style="border-collapse: collapse;">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Turno</th>
+                                            <th scope="col">Hora</th>  
+                                            <th scope="col">Lunes</th>
+                                            <th scope="col">Martes</th>
+                                            <th scope="col">Miércoles</th>
+                                            <th scope="col">Jueves</th>
+                                            <th scope="col">Viernes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for clase in range_list %}
+                                        <tr>
+                                            <td style="border: 2px solid black; width: 120px; height: 71.33px;">{{ clase }}ª</td> 
+                                            <td style="border: 2px solid black; vertical-align: middle; width: 120px; height: 71.33px;">
+                                                {% if clase == 1 %}8:00-9:20
+                                                {% elif clase == 2 %}9:30-10:50
+                                                {% elif clase == 3 %}11:00-12:20
+                                                {% elif clase == 4 %}12:30-1:50
+                                                {% elif clase == 5 %}2:00-3:20
+                                                {% elif clase == 6 %}3:30-4:50
+                                                {% endif %}
+                                            </td> 
+                                            {% for dia in range_lista %}
+                                            <td style="border: 2px solid black; vertical-align: middle; width: 120px; height: 71.33px;">
+                                                {% with turno=None %}
+                                                    {% for t in horario.turnos.all %}
+                                                        {% if t.clase == clase and t.dia == dia %}
+                                                            {% with turno=t %}
+                                                                <!-- Contenido de la celda -->
+                                                                <div style="padding-bottom: 5px;">
+                                                                    {{ turno.asignatura.siglas }} - {{ turno.tipo }}
+                                                                </div>
+                                                                <div style="border-top: 1px solid black;"></div> 
+                                                                
+                                                                {% if turno.local.numero >= 10 %}
+                                                                {{ turno.local.tipo }} - {{ turno.local.piso }}{{ turno.local.numero }}
+                                                                {% else %}
+                                                                {{ turno.local.tipo }} - {{ turno.local.piso }}0{{ turno.local.numero }}
+                                                                {% endif %}
+                                                            {% endwith %}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            </td> 
+                                            {% endfor %}
+                                        </tr> 
+                                        {% endfor %}
+                                    </tbody> 
+                                </table> 
+                            </div> 
+                        </div> 
+                    </div> 
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info text-center" role="alert">
+                    No hay horarios disponibles. 
+                   
+                </div>
+            {% endif %}
+        </main>
+    </div> 
+</div>
+{% endblock %}
