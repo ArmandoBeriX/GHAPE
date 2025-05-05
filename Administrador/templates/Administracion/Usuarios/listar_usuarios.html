@@ -8,11 +8,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Gestor de Horarios Académicos para Profesores y Estudiantes">
     <title>Lista de Usuarios</title>
+    <style>
+        .navbar {
+            background-color: rgb(0, 2, 89) !important;
+        }
+        .navbar-brand {
+            color: rgb(231, 163, 18) !important;
+        }
+        .login-text {
+            color: rgb(80, 184, 37);
+            margin-right: 15px;
+        }
+        .action-buttons .btn {
+            margin: 2px;
+        }
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .action-buttons .btn {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: rgb(0, 2, 89);">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="https://eva.uci.cu/" style="color: rgb(231, 163, 18);">
+            <a class="navbar-brand" href="https://eva.uci.cu/">
                 Gestor de Horarios Académicos para Profesores y Estudiantes
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,7 +44,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="ms-auto d-flex align-items-center">
-                    <span class="login me-3" style="color: rgb(80, 184, 37);">Estás navegando como: {{ user.username }}</span>
+                    <span class="login-text me-3">Estás navegando como: {{ user.username }}</span>
                     <a href="{% url 'Salir' %}" class="btn btn-danger">Cerrar Sesión</a>
                 </div>
             </div>
@@ -28,38 +52,63 @@
     </nav>
 
     <div class="container-fluid mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 header-actions">
             <h1>Lista de Usuarios</h1>
-            <a href="{% url 'Crear_Usuarios' %}" class="btn btn-success">Agregar Usuario</a>
+            <div class="d-flex gap-2 action-buttons">
+                <a href="{% url 'Selector' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver al Selector
+                </a>
+                <a href="{% url 'Crear_Usuarios' %}" class="btn btn-success">
+                    <i class="bi bi-plus-circle"></i> Agregar Usuario
+                </a>
+            </div>
         </div>
 
         {% if usuarios %}
             <div class="table-responsive">
                 <table class="table table-striped w-100">
-                    <thead>
+                    <thead class="table-light">
                         <tr>
-                            <th>ID</th> <!-- Nueva columna para el ID -->
+                            <th>ID</th>
                             <th>Nombre de Usuario</th>
                             <th>Correo Electrónico</th>
-                            <th>Año</th> <!-- Nueva columna para el año -->
+                            <th>Año</th>
                             <th>Estado</th>
-                            <th>Rol</th> <!-- Nueva columna para el grupo -->
+                            <th>Rol</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for usuario in usuarios %}
                         <tr>
-                            <td>{{ usuario.id }}</td>  <!-- ID del usuario -->
-                            <td>{{ usuario.username }}</td>  <!-- Nombre de usuario -->
-                            <td>{{ usuario.email }}</td>      <!-- Correo electrónico -->
-                            <td>{{ usuario.año }}</td> <!-- Mostrar año o "No Asignado" -->
-                            <td>{% if usuario.is_active %}Activo{% else %}Inactivo{% endif %}</td>  <!-- Estado del usuario -->
-                            <td>{% for group in usuario.groups %}{{ group.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</td> <!-- Grupo(s) del usuario -->
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.username }}</td>
+                            <td>{{ usuario.email }}</td>
+                            <td>{{ usuario.año }}</td>
                             <td>
-                                <a href="{% url 'Editar_Usuarios' usuario.id %}" class="btn btn-warning btn-sm">Editar</a>
-                                <a href="{% url 'Quitar_Usuarios' usuario.id %}" class="btn btn-danger btn-sm">Eliminar</a> <!-- Corregido el tag url -->
-                                <a href="{% url 'Cambiar_Clave' usuario.id %}" class="btn btn-primary btn-sm">Cambiar Contraseña</a>
+                                {% if usuario.is_active %}
+                                    <span class="badge bg-success">Activo</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactivo</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% for group in usuario.groups %}
+                                    <span class="badge bg-primary">{{ group.name }}</span>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <a href="{% url 'Editar_Usuarios' usuario.id %}" class="btn btn-warning btn-sm">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                    <a href="{% url 'Quitar_Usuarios' usuario.id %}" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </a>
+                                    <a href="{% url 'Cambiar_Clave' usuario.id %}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-key"></i> Contraseña
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -68,11 +117,13 @@
             </div>
         {% else %}
             <div class="alert alert-info" role="alert">
-                No hay Usuarios disponibles.
+                <i class="bi bi-info-circle"></i> No hay usuarios registrados.
             </div>
         {% endif %}
     </div>
 
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
 </body>
 </html>

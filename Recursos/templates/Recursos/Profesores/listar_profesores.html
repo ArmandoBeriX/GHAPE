@@ -1,54 +1,54 @@
 {% extends 'Recursos/recursos.html' %}
 {% load static %}
 
-{% block recurso %}
-
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h1>Lista de Profesores</h1>
-        <a href="{% url 'Crear_Profesores' %}" class="btn btn-success">Agregar Profesor</a>
+{% block contenido_recurso %}
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Profesores</h5>
+        <a href="{% url 'Crear_Profesores' %}" class="btn btn-success btn-sm">
+            <i class="bi bi-person-plus"></i> Nuevo Profesor
+        </a>
     </div>
-
-    {% if profesores %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Asignatura</th>
-                    <th>Tipo</th>
-                    {% if is_admin %}
-                        <th>Creador</th>  <!-- Columna adicional para Administradores -->
-                    {% endif %}
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for profesor in profesores %}
-                <tr>
-                    <td>{{ profesor.nombre }}</td>
-                    <td>{{ profesor.asignatura }}</td>
-                    <td>{{ profesor.tipo }}</td>
-
-                    {% if is_admin %}
-                        <td>{{ profesor.creador.username }}</td>  <!-- Mostrar el creador solo para Administradores -->
-                    {% endif %}
-                    
-                    <td>
-                        <!-- Verificar si el usuario es el creador antes de mostrar los botones -->
-                        {% if is_admin or profesor.creador == request.user %}
-                        <a href="{% url 'Editar_Profesores' profesor.id %}" class="btn btn-warning">Editar</a>
-                        <a href="{% url 'Quitar_Profesores' profesor.id %}" class="btn btn-danger">Eliminar</a>
+    <div class="card-body">
+        {% if profesores %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Asignatura</th>
+                        <th>Tipo</th>
+                        {% if is_admin %}
+                        <th>Creador</th>
                         {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="alert alert-info" role="alert">
-            No hay profesores disponibles.
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profesor in profesores %}
+                    <tr>
+                        <td>{{ profesor.nombre }}</td>
+                        <td>{{ profesor.asignatura.siglas }}</td>
+                        <td>{{ profesor.tipo }}</td>
+                        {% if is_admin %}
+                        <td>{{ profesor.creador.username }}</td>
+                        {% endif %}
+                        <td>
+                            {% if is_admin or profesor.creador == request.user %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'Editar_Profesores' profesor.id %}" class="btn btn-warning">Editar</a>
+                                <a href="{% url 'Quitar_Profesores' profesor.id %}" class="btn btn-danger">Eliminar</a>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    {% endif %}
+        {% else %}
+        <div class="alert alert-info">No hay profesores registrados</div>
+        {% endif %}
+    </div>
 </div>
-
 {% endblock %}

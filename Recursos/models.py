@@ -27,10 +27,16 @@ class Local(models.Model):
     tipo = models.CharField(max_length=2, choices=tipos, default='A')
     piso = models.PositiveSmallIntegerField(default=1)
     numero = models.PositiveSmallIntegerField(default=1)
-    creador = models.ForeignKey(User, on_delete=models.CASCADE)  # Nuevo campo
+    # Eliminado el campo creador ya que solo los admins pueden gestionar locales
+    
+    class Meta:
+        permissions = [
+            ("can_manage_locales", "Puede gestionar locales académicos")
+        ]
+        unique_together = ['tipo', 'piso', 'numero']  # Evitar duplicados
 
     def __str__(self):
-        return f"{self.tipo}-{self.numero:02d}"
+        return f"{self.tipo}-{self.piso}{self.numero:02d}"  # Formato mejorado
 
 class Profesor(models.Model):
     tipo = models.CharField(max_length=2, choices=[('CP', 'Clase Practica'), ('C', 'Conferencia'), ('L', 'Laboratorio'), ('T', 'Taller'), ('S', 'Seminario')], default='C')

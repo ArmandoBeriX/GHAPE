@@ -1,67 +1,87 @@
+{% extends 'Base/selector.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gestor de Horarios Académicos para Profesores y Estudiantes">
-    <title>Agregar Asignatura</title>
-</head>
-<body style="background-color: rgb(0, 2, 89);">
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: white;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="https://eva.uci.cu/" style="color: rgb(231, 163, 18);">
-                Gestor de Horarios Académicos para Profesores y Estudiantes
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="ms-auto d-flex align-items-center">
-                    <a href="{% url 'Listar_Asignaturas' %}" class="btn btn-success">Cancelar</a>
+{% block recursos %}
+<div class="container-fluid mt-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Nueva Asignatura</h5>
+                    <a href="{% url 'Listar_Asignaturas' %}" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            {{ form.nombre.label_tag }}
+                            {{ form.nombre }}
+                        </div>
+                        
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.siglas.label_tag }}
+                                    {{ form.siglas }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.catedra.label_tag }}
+                                    {{ form.catedra }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if is_admin %}
+                        <div class="mb-3">
+                            <label for="creador">Creador:</label>
+                            <select name="creador" id="creador" class="form-select">
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-save"></i> Guardar Asignatura
+                        </button>
+                    </form>
+
+                    {% if 'ok' in request.GET %}
+                    <div class="alert alert-success mt-3" role="alert">
+                        <i class="bi bi-check-circle"></i> Asignatura guardada correctamente
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'error' in request.GET %}
+                    <div class="alert alert-danger mt-3" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> Error en los datos ingresados
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </nav>
-
-    <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div>
-            <form action="" method="POST" class="container mt-5 p-4 bg-white rounded shadow">
-                {% csrf_token %}
-                
-                {{ form.as_p }}  <!-- Mostrar el formulario de asignatura -->
-
-                {% if is_admin %}
-                    <div class="form-group">
-                        <label for="creador">Creador/Dueño:</label>
-                        <select name="creador" id="creador" class="form-control">
-                            {% for user in users %}
-                                <option value="{{ user.id }}">{{ user.username }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                {% endif %}
-                
-                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-            </form>
-
-            {% if 'ok' in request.GET %}
-            <div class="alert alert-success mt-5" role="alert">
-                <strong>Asignatura guardada con éxito en el sistema.</strong>
-            </div>
-            {% endif %}
-            
-            {% if 'error' in request.GET %}
-            <div class="alert alert-danger mt-5" role="alert">
-                <strong>Alguno de los campos está erróneo o vacío.</strong>
-            </div>
-            {% endif %}
-        </div>
     </div>
+</div>
 
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-    <script src="{% static 'javascript/locales/validar_asignaturas.js' %}"></script>
-</body>
-</html>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+<style>
+    /* Estilos específicos para formularios */
+    .form-control, .form-select {
+        margin-bottom: 1rem;
+    }
+    @media (max-width: 768px) {
+        .card {
+            border: none;
+            box-shadow: none;
+        }
+    }
+</style>
+{% endblock %}

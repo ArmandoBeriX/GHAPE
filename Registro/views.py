@@ -21,7 +21,7 @@ def register(request):
             return redirect('Login')  # Redirige a la página de inicio de sesión o a donde desees
     else:
         form = CustomUserCreationForm()
-    return render(request, 'Registration/agregar.html', {'form': form})
+    return render(request, 'registration/agregar.html', {'form': form})
 
 
 
@@ -44,7 +44,7 @@ def login(request):
         # Validación básica de campos
         if not username or not password:
             messages.error(request, "⚠️ Complete todos los campos.")
-            return render(request, 'Registration/login.html', {'username': username})
+            return render(request, 'registration/login.html', {'username': username})
         
         # Autenticación del usuario
         user = authenticate(request, username=username, password=password)
@@ -63,12 +63,12 @@ def login(request):
                 return redirect(next_url if next_url else 'Selector')
             else:
                 messages.error(request, "⛔ No tienes permisos para acceder al sistema.")
-                return render(request, 'Registration/login.html', {'username': username})
+                return render(request, 'registration/login.html', {'username': username})
         else:
             messages.error(request, "🔐 Usuario o contraseña incorrectos.")
-            return render(request, 'Registration/login.html', {'username': username})
+            return render(request, 'registration/login.html', {'username': username})
     
-    return render(request, 'Registration/login.html')
+    return render(request, 'registration/login.html')
 
 def exit(request):
     logout(request)

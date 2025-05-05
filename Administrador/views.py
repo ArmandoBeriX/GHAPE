@@ -34,9 +34,9 @@ def c_usuarios(request):
             año = usuario_form.cleaned_data.get('año')  # Obtener el año del formulario
             Usuario.objects.create(usuario=usuario, año=año) 
 
-            return redirect(reverse('Crear_Usuarios') + '?ok')
+            return redirect('Listar_Usuarios')
         else:
-            return redirect(reverse('Crear_Usuarios') + '?error')
+            return redirect(reverse('Crear_Usuario') + '?error')
 
     return render(request, 'Administracion/Usuarios/crear_usuarios.html', {'form': usuario_form})
 

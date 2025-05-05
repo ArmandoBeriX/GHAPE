@@ -26,42 +26,21 @@ def recursosView(request):
 
 # Los crear
 @method_decorator(login_required, name='dispatch')
+@method_decorator(grupo_requerido('Administrador'), name='dispatch')  # Solo admin
 class CrearLocales(View):
     def get(self, request):
-        local_form = LocalForm()  # Crear una instancia del formulario
-
-        # Verificar si el usuario es administrador
-        is_admin = request.user.groups.filter(name='Administrador').exists()
-
+        local_form = LocalForm()
         return render(request, 'Recursos/Locales/crear_locales.html', {
-            'form': local_form,
-            'is_admin': is_admin,
-            'users': User.objects.all() if is_admin else []  # Pasar lista de usuarios si es admin
+            'form': local_form
         })
 
     def post(self, request):
-        local_form = LocalForm(data=request.POST)  # Crear una instancia del formulario con los datos POST
-
-        # Verificar si el usuario es administrador
-        is_admin = request.user.groups.filter(name='Administrador').exists()
-
+        local_form = LocalForm(data=request.POST)
         if local_form.is_valid():
-            nuevo_local = local_form.save(commit=False)  # No guardar aún
-
-            if is_admin:
-                # Establecer el creador desde el formulario
-                creador_id = request.POST.get('creador')
-                nuevo_local.creador = User.objects.get(id=creador_id)  # Obtener el usuario por ID
-            else:
-                nuevo_local.creador = request.user  # Establecer el creador como el usuario autenticado
-
-            nuevo_local.save()  # Ahora guardar
-            return redirect(reverse('Crear_Locales') + '?ok')
-        
+            local_form.save()
+            return redirect('Listar_Locales')
         return render(request, 'Recursos/Locales/crear_locales.html', {
-            'form': local_form,
-            'is_admin': is_admin,
-            'users': User.objects.all() if is_admin else []  # Pasar lista de usuarios si es admin
+            'form': local_form
         })
 
 @login_required
@@ -84,7 +63,7 @@ def c_asignaturas(request):
                 nueva_asignatura.creador = request.user  # Establecer el creador como el usuario autenticado
 
             nueva_asignatura.save()  # Ahora guardar
-            return redirect(reverse('Crear_Asignaturas') + '?ok')
+            return redirect('Listar_Asignaturas')
         else:
             return render(request, 'Recursos/Asignaturas/crear_asignaturas.html', {
                 'form': asignatura_form,
@@ -122,7 +101,7 @@ def c_grupos(request):
             nuevo_grupo.year = año_usuario  # Asignar el año del usuario
             nuevo_grupo.save()
            
-            return redirect('Crear_Grupos')
+            return redirect('Listar_Grupos')
        
     else:
         grupo_form = GrupoForm(año_usuario=año_usuario)  # Pasar año al formulario
@@ -154,7 +133,7 @@ def c_profesores(request):
                 nuevo_profesor.creador = request.user  # Establecer el creador como el usuario autenticado
 
             nuevo_profesor.save()  # Ahora guardar
-            return redirect(reverse('Crear_Profesores') + '?ok')
+            return redirect('Listar_Profesores')
         else:
             return render(request, 'Recursos/Profesores/crear_profesores.html', {
                 'form': profesor_form,
@@ -171,20 +150,13 @@ def c_profesores(request):
 # Los listar
 @method_decorator(login_required, name='dispatch')
 @method_decorator(grupo_requerido('Profesor de Año'), name='dispatch')
+@method_decorator(login_required, name='dispatch')
 class ListarLocales(View):
     def get(self, request):
-        is_admin = request.user.groups.filter(name='Administrador').exists()  # Verificar si es administrador
-        
-        if is_admin:
-            # Si el usuario es administrador, mostrar todos los locales
-            locales = Local.objects.all()
-        else:
-            # Si no es administrador, mostrar solo los locales creados por el usuario
-            locales = Local.objects.filter(creador=request.user)
-
+        locales = Local.objects.all()  # Todos ven los mismos locales
         return render(request, 'Recursos/Locales/listar_locales.html', {
             'locales': locales,
-            'is_admin': is_admin
+            'is_admin': request.user.groups.filter(name='Administrador').exists()
         })
 
 @login_required
@@ -232,11 +204,10 @@ def l_profesores(request):
 @never_cache
 # Los editar
 @login_required
-@grupo_requerido('Profesor de Año')
+@grupo_requerido('Administrador')  # Solo admin
 def e_locales(request, id):
-    # Obtener el local asegurándose de que el creador es el usuario autenticado
-    local = get_object_or_404(Local, id=id, creador=request.user)  # Verificar que el creador es el usuario actual
-
+    local = get_object_or_404(Local, id=id)
+    
     if request.method == 'POST':
         form = LocalForm(request.POST, instance=local)
         if form.is_valid():
@@ -245,7 +216,7 @@ def e_locales(request, id):
     else:
         form = LocalForm(instance=local)
 
-    return render(request, 'Recursos/Locales/editar_locales.html', {'form': form})  # Corregir la plantilla
+    return render(request, 'Recursos/Locales/editar_locales.html', {'form': form})
 
 @login_required
 @grupo_requerido('Profesor de Año')
@@ -338,39 +309,18 @@ def e_profesores(request, id):
 
 # Los quitar
 @method_decorator(login_required, name='dispatch')
-@method_decorator(grupo_requerido('Profesor de Año'), name='dispatch')
+@method_decorator(grupo_requerido('Administrador'), name='dispatch')  # Solo admin
 class QuitarLocales(View):
     def get(self, request, id):
-        # Obtener el local asegurándose de que el creador es el usuario autenticado o si es un administrador
-        local = get_object_or_404(Local, id=id)  # No filtrar por creador
-
-        # Verificar si el usuario es el creador o un administrador
-        is_creator = local.creador == request.user
-        is_admin = request.user.groups.filter(name='Administrador').exists()
-
+        local = get_object_or_404(Local, id=id)
         return render(request, 'Recursos/Locales/quitar_locales.html', {
-            'local': local,
-            'is_creator': is_creator,
-            'is_admin': is_admin
+            'local': local
         })
 
     def post(self, request, id):
-       
-        local = get_object_or_404(Local, id=id)  
-
-        is_creator = local.creador == request.user
-        is_admin = request.user.groups.filter(name='Administrador').exists()
-
-        if is_creator or is_admin:
-            local.delete() 
-            return redirect('Listar_Locales') 
-        
-        return render(request, 'Recursos/Locales/quitar_locales.html', {
-            'local': local,
-            'is_creator': is_creator,
-            'is_admin': is_admin,
-            'error': 'No tienes permiso para eliminar este local.'  
-        })
+        local = get_object_or_404(Local, id=id)
+        local.delete()
+        return redirect('Listar_Locales')
         
 @login_required
 @grupo_requerido('Profesor de Año')

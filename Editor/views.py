@@ -20,6 +20,7 @@ import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models import Q  # Añade esta importación al inicio del archivo
+
 @csrf_exempt
 def verificar_disponibilidad_local(request):
     if request.method == 'POST':
@@ -32,7 +33,7 @@ def verificar_disponibilidad_local(request):
             grupo_id = data.get('grupo_id')
             horario_id = data.get('horario_id')
 
-            # Consulta base para locales ocupados
+            # Consulta base para locales ocupados (eliminada verificación de creador)
             query = Q(
                 local_id=local_id,
                 dia=dia,
@@ -59,7 +60,6 @@ def verificar_disponibilidad_local(request):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=400)
     return JsonResponse({'error': 'Método no permitido'}, status=405)
-
 
 
 
@@ -116,6 +116,7 @@ def l_horarios(request, balance_id=None):
     })
 #crear
 
+# En la función c_horarios (crear horarios)
 @login_required
 def c_horarios(request, balance_id):
     balance = get_object_or_404(Balance, id=balance_id)
@@ -150,13 +151,7 @@ def c_horarios(request, balance_id):
                     local_id = request.POST.get(f'turnos[{grupo_id}][{clase}][{dia}][local]')
                     
                     if local_id:
-                        # Verificar si el local pertenece al usuario
-                        if not Local.objects.filter(id=local_id, creador=request.user).exists():
-                            tiene_errores = True
-                            errores_por_celda.setdefault(grupo_id, {}).setdefault(clase, {})[dia] = "No tiene permiso para usar este local"
-                            continue
-                            
-                        # Verificar colisión
+                        # Verificar colisión (eliminada la verificación de creador)
                         local_ocupado = Turno.objects.filter(
                             local_id=local_id,
                             dia=dia,
@@ -173,7 +168,7 @@ def c_horarios(request, balance_id):
             context = {
                 'grupos': grupos_sin_horario,
                 'asignaturas': Asignatura.objects.filter(creador=request.user),
-                'locales': Local.objects.filter(creador=request.user),
+                'locales': Local.objects.all(),  # Todos los locales disponibles
                 'balance': balance,
                 'range_list': range(1, 6),
                 'range_lista': range(1, 7),
@@ -183,6 +178,8 @@ def c_horarios(request, balance_id):
                 'datos_formulario': request.POST
             }
             return render(request, 'Lienzo/Horarios/crear_horarios.html', context)
+
+        # Resto del código permanece igual...
 
         # Si no hay errores, proceder a guardar
         for grupo_id in grupos_seleccionados:
@@ -233,7 +230,7 @@ def c_horarios(request, balance_id):
     context = {
         'grupos': grupos_sin_horario,
         'asignaturas': Asignatura.objects.filter(creador=request.user),
-        'locales': Local.objects.filter(creador=request.user),
+        'locales': Local.objects.filter(),
         'balance': balance,
         'range_list': range(1, 6),
         'range_lista': range(1, 7),
@@ -241,6 +238,7 @@ def c_horarios(request, balance_id):
         'turnos_ocupados': list(turnos_ocupados)
     }
     return render(request, 'Lienzo/Horarios/crear_horarios.html', context)
+
 #quitar 
 @login_required
 def q_horarios(request, horario_id):
@@ -308,7 +306,7 @@ def e_horarios(request, horario_id):
     else:
         grupos = Grupo.objects.filter(creador=request.user)
         asignaturas = Asignatura.objects.filter(creador=request.user)
-        locales = Local.objects.filter(creador=request.user)
+        locales = Local.objects.filter()
         users = []
 
     if request.method == 'POST':

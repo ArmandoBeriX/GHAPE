@@ -1,54 +1,54 @@
 {% extends 'Recursos/recursos.html' %}
 {% load static %}
 
-{% block recurso %}
-
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-        <h1>Lista de Asignaturas</h1>
-        <a href="{% url 'Crear_Asignaturas' %}" class="btn btn-success">Agregar Asignatura</a>
+{% block contenido_recurso %}
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Asignaturas</h5>
+        <a href="{% url 'Crear_Asignaturas' %}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-circle"></i> Nueva Asignatura
+        </a>
     </div>
-
-    {% if asignaturas %}
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Siglas</th>
-                    <th>Cátedra</th>
-                    {% if is_admin %}
-                        <th>Creador</th>  <!-- Columna adicional para Administradores -->
-                    {% endif %}
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for asignatura in asignaturas %}
-                <tr>
-                    <td>{{ asignatura.nombre }}</td>
-                    <td>{{ asignatura.siglas }}</td>
-                    <td>{{ asignatura.catedra }}</td>
-
-                    {% if is_admin %}
-                        <td>{{ asignatura.creador.username }}</td>  <!-- Mostrar el creador solo para Administradores -->
-                    {% endif %}
-                    
-                    <td>
-                        <!-- Los botones de acción solo se muestran si el usuario es el creador -->
-                        {% if is_admin or asignatura.creador == request.user %}
-                        <a href="{% url 'Editar_Asignaturas' asignatura.id %}" class="btn btn-warning">Editar</a>
-                        <a href="{% url 'Quitar_Asignaturas' asignatura.id %}" class="btn btn-danger">Eliminar</a>
+    <div class="card-body">
+        {% if asignaturas %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Siglas</th>
+                        <th>Cátedra</th>
+                        {% if is_admin %}
+                        <th>Creador</th>
                         {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <div class="alert alert-info" role="alert">
-            No hay asignaturas disponibles.
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asignatura in asignaturas %}
+                    <tr>
+                        <td>{{ asignatura.nombre }}</td>
+                        <td>{{ asignatura.siglas }}</td>
+                        <td>{{ asignatura.catedra }}</td>
+                        {% if is_admin %}
+                        <td>{{ asignatura.creador.username }}</td>
+                        {% endif %}
+                        <td>
+                            {% if is_admin or asignatura.creador == request.user %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'Editar_Asignaturas' asignatura.id %}" class="btn btn-warning">Editar</a>
+                                <a href="{% url 'Quitar_Asignaturas' asignatura.id %}" class="btn btn-danger">Eliminar</a>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    {% endif %}
+        {% else %}
+        <div class="alert alert-info">No hay asignaturas registradas</div>
+        {% endif %}
+    </div>
 </div>
-
 {% endblock %}

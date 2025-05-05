@@ -1,55 +1,87 @@
+{% extends 'Base/selector.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gestor de Horarios Académicos para Profesores y Estudiantes">
-    <title>Agregar Balance</title>
-</head>
-<body style="background-color: rgb(0, 2, 89);">
-    <nav class="navbar navbar-expand-lg navbar-light" style="background-color: white;">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="https://eva.uci.cu/" style="color: rgb(231, 163, 18);">
-                Gestor de Horarios Académicos para Profesores y Estudiantes
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="ms-auto d-flex align-items-center">
-                    <a href="{% url 'Listar_Balances' %}" class="btn btn-success">Cancelar</a>
+{% block recursos %}
+<div class="container-fluid mt-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Nueva Semana Académica</h5>
+                    <a href="{% url 'Listar_Balances' %}" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated and is_admin %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.numero_semana.label_tag }}
+                                    {{ form.numero_semana }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.dia_inicio.label_tag }}
+                                    <input type="date" name="dia_inicio" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.dia_fin.label_tag }}
+                                    <input type="date" name="dia_fin" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-save"></i> Guardar Semana
+                        </button>
+                    </form>
+                    {% elif not is_admin %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-lock"></i> Solo administradores pueden crear semanas académicas
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-octagon"></i> Debes iniciar sesión
+                    </div>
+                    {% endif %}
+
+                    <!-- Mensajes de estado -->
+                    {% if 'ok' in request.GET %}
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-check-circle"></i> Semana guardada exitosamente
+                    </div>
+                    {% endif %}
+                    {% if 'error' in request.GET %}
+                    <div class="alert alert-danger mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> Fechas inválidas o semana duplicada
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </nav>
-
-    <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div>
-            <form action="" method="POST" class="container mt-5 p-4 bg-white rounded shadow">
-                {% csrf_token %}
-                
-                {{ form.as_p }}
-
-                <button type="submit" class="btn btn-primary w-100">Ingresar</button>
-            </form>
-
-            {% if 'ok' in request.GET %}
-            <div class="alert alert-success mt-5" role="alert">
-                <strong>Balance guardado con éxito en el sistema.</strong>
-            </div>
-            {% endif %}
-            
-            {% if 'error' in request.GET %}
-            <div class="alert alert-danger mt-5" role="alert">
-                <strong>Alguno de los campos está erróneo o vacío.</strong>
-            </div>
-            {% endif %}
-        </div>
     </div>
+</div>
 
-    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
-</body>
-</html>
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+<script>
+    // Validación básica de fechas
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const inicio = new Date(document.querySelector('input[name="dia_inicio"]').value);
+        const fin = new Date(document.querySelector('input[name="dia_fin"]').value);
+        
+        if (fin <= inicio) {
+            e.preventDefault();
+            alert('La fecha de fin debe ser posterior a la de inicio');
+        }
+    });
+</script>
+{% endblock %}
