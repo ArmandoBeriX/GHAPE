@@ -1,0 +1,87 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<div class="container-fluid mt-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Nueva Semana Académica</h5>
+                    <a href="{% url 'Listar_Balances' %}" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated and is_admin %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.numero_semana.label_tag }}
+                                    {{ form.numero_semana }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.dia_inicio.label_tag }}
+                                    <input type="date" name="dia_inicio" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.dia_fin.label_tag }}
+                                    <input type="date" name="dia_fin" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-save"></i> Guardar Semana
+                        </button>
+                    </form>
+                    {% elif not is_admin %}
+                    <div class="alert alert-warning">
+                        <i class="bi bi-shield-lock"></i> Solo administradores pueden crear semanas académicas
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-octagon"></i> Debes iniciar sesión
+                    </div>
+                    {% endif %}
+
+                    <!-- Mensajes de estado -->
+                    {% if 'ok' in request.GET %}
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-check-circle"></i> Semana guardada exitosamente
+                    </div>
+                    {% endif %}
+                    {% if 'error' in request.GET %}
+                    <div class="alert alert-danger mt-3">
+                        <i class="bi bi-exclamation-triangle"></i> Fechas inválidas o semana duplicada
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+<script>
+    // Validación básica de fechas
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const inicio = new Date(document.querySelector('input[name="dia_inicio"]').value);
+        const fin = new Date(document.querySelector('input[name="dia_fin"]').value);
+        
+        if (fin <= inicio) {
+            e.preventDefault();
+            alert('La fecha de fin debe ser posterior a la de inicio');
+        }
+    });
+</script>
+{% endblock %}

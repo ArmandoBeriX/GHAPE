@@ -1,0 +1,101 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Contenido principal -->
+        <main class="col-12 px-md-4 py-3">
+            <div class="d-flex flex-column pt-3 pb-2 mb-3 border-bottom">
+                <!-- Título y botón de filtrado -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h1 class="h2 mb-0">Gestión de Semanas</h1>
+                    <div class="btn-group">
+                    
+                    <a href="{% url 'Vista_Previa' %}" class="btn btn-primary text-white">
+                        <i class="bi bi-eye-fill"></i> Vista Previa
+                    </a>
+                </div>
+                </div>
+                
+                <!-- Barra de acciones principal -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center">
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <a href="{% url 'Selector' %}" class="btn btn-warning me-2">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                        {% if is_admin %}
+                        <a href="{% url 'Crear_Balances' %}" class="btn btn-success">
+                            <i class="bi bi-plus-circle"></i> Nueva Semana
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if balances %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for balance in balances %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">Semana {{ balance.numero_semana }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                <i class="bi bi-calendar"></i> 
+                                {{ balance.dia_inicio|date:"d M Y" }} - {{ balance.dia_fin|date:"d M Y" }}
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'Listar_Horarios' balance.id %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-calendar-week"></i> Horarios
+                                </a>
+                                {% if is_admin %}
+                                <div class="btn-group">
+                                    <a href="{% url 'Editar_Balances' balance.id %}" class="btn btn-outline-warning btn-sm" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a href="{% url 'Quitar_Balances' balance.id %}" class="btn btn-outline-danger btn-sm" title="Eliminar">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-calendar-event" style="font-size: 3rem; color: #6c757d;"></i>
+                    <h3 class="mt-3">No hay semanas registradas</h3>
+                    <p class="text-muted">Actualmente no hay semanas disponibles para mostrar.</p>
+                    {% if is_admin %}
+                    <a href="{% url 'Crear_Balances' %}" class="btn btn-success mt-3">
+                        <i class="bi bi-plus-circle"></i> Crear Primera Semana
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gestor de Horarios Académicos para Profesores y Estudiantes">
+    <title>Lista de Usuarios</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-bg: rgb(0, 2, 89);
+            --accent-color: rgb(231, 163, 18);
+            --success-color: rgb(80, 184, 37);
+        }
+        
+        /* Navbar styling */
+        .navbar {
+            background-color: var(--primary-bg) !important;
+        }
+        .navbar-brand {
+            color: var(--accent-color) !important;
+            font-weight: 500;
+        }
+        .login-text {
+            color: var(--success-color);
+            margin-right: 15px;
+        }
+        
+        /* Table styling */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .table th {
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            background-color: #f8f9fa;
+        }
+        
+        /* Action buttons */
+        .action-buttons .btn {
+            margin: 2px;
+            min-width: 80px;
+        }
+        .badge {
+            font-size: 0.85em;
+            margin: 1px;
+        }
+        
+        /* Card styling (similar to recursos.html) */
+        .card {
+            border-radius: 0.5rem;
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .card-header {
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .action-buttons .btn {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+            .login-text {
+                display: block;
+                margin: 5px 0;
+                text-align: center;
+            }
+            .navbar-collapse {
+                padding-top: 10px;
+            }
+            
+            /* Stack table cells vertically on small screens */
+            .table-responsive table {
+                width: 100%;
+            }
+            .table-responsive thead {
+                display: none;
+            }
+            .table-responsive tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid #dee2e6;
+                border-radius: 0.25rem;
+            }
+            .table-responsive td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem;
+                border-bottom: 1px solid #dee2e6;
+            }
+            .table-responsive td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                margin-right: 1rem;
+            }
+            .table-responsive td:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar (similar to principal.html) -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-fluid">
+            <a class="navbar-brand text-truncate" href="https://eva.uci.cu/" style="max-width: 70%">
+                Gestor de Horarios Académicos
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="ms-auto d-flex align-items-center flex-wrap">
+                    <span class="login-text me-3">Estás navegando como: {{ user.username }}</span>
+                    <a href="{% url 'Salir' %}" class="btn btn-danger btn-sm">Cerrar Sesión</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content container (similar to recursos.html) -->
+    <div class="container-fluid mt-3">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <h2 class="h5 mb-0">Lista de Usuarios</h2>
+                    <div class="d-flex gap-2 mt-2 mt-md-0 action-buttons">
+                        <a href="{% url 'Selector' %}" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </a>
+                        <a href="{% url 'Crear_Usuarios' %}" class="btn btn-success btn-sm">
+                            <i class="bi bi-plus-circle"></i> Agregar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                {% if usuarios %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Usuario</th>
+                                    <th>Email</th>
+                                    <th>Año</th>
+                                    <th>Estado</th>
+                                    <th>Rol</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for usuario in usuarios %}
+                                <tr>
+                                    <td data-label="ID">{{ usuario.id }}</td>
+                                    <td data-label="Usuario">{{ usuario.username }}</td>
+                                    <td data-label="Email">{{ usuario.email }}</td>
+                                    <td data-label="Año">{{ usuario.año }}</td>
+                                    <td data-label="Estado">
+                                        {% if usuario.is_active %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td data-label="Rol">
+                                        {% for group in usuario.groups %}
+                                            <span class="badge bg-primary">{{ group.name }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td data-label="Acciones">
+                                        <div class="d-flex flex-wrap gap-1">
+                                            <a href="{% url 'Editar_Usuarios' usuario.id %}" class="btn btn-warning btn-sm" title="Editar">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'Quitar_Usuarios' usuario.id %}" class="btn btn-danger btn-sm" title="Eliminar">
+                                                <i class="bi bi-trash"></i>
+                                            </a>
+                                            <a href="{% url 'Cambiar_Clave' usuario.id %}" class="btn btn-primary btn-sm" title="Contraseña">
+                                                <i class="bi bi-key"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="bi bi-info-circle"></i> No hay usuarios registrados.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+        // Convert table to card layout on small screens
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.innerWidth <= 768) {
+                const cells = document.querySelectorAll('.table-responsive td[data-label]');
+                cells.forEach(cell => {
+                    cell.setAttribute('data-label', cell.getAttribute('data-label'));
+                });
+            }
+        });
+    </script>
+</body>
+</html>

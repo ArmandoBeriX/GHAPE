@@ -1,0 +1,52 @@
+{% extends 'Recursos/recursos.html' %}
+{% load static %}
+
+{% block contenido_recurso %}
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Semanas Académicas</h5>
+        {% if is_admin %}
+        <a href="{% url 'Crear_Balances' %}" class="btn btn-success btn-sm">
+            <i class="bi bi-calendar-plus"></i> Nueva Semana
+        </a>
+        {% endif %}
+    </div>
+    <div class="card-body">
+        {% if balances %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Semana</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        {% if is_admin %}
+                        <th>Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for balance in balances %}
+                    <tr>
+                        <td>{{ balance.numero_semana }}</td>
+                        <td>{{ balance.dia_inicio|date:"d/m/Y" }}</td>
+                        <td>{{ balance.dia_fin|date:"d/m/Y" }}</td>
+                        {% if is_admin %}
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'Editar_Balances' balance.id %}" class="btn btn-warning">Editar</a>
+                                <a href="{% url 'Quitar_Balances' balance.id %}" class="btn btn-danger">Eliminar</a>
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No hay semanas académicas registradas</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends 'Registration/login.html' %}
+{% load static %}
+
+{% block creausuario %}
+
+{{ form }}
+
+<button type="submit" class="btn btn-success w-100 mb-2">Crear Cuenta</button>
+<a href="{% url 'Login' %}" class="btn btn-primary w-100"> Volver para Iniciar Sesion</a>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'Recursos/recursos.html' %}
+{% load static %}
+
+{% block contenido_recurso %}
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Asignaturas</h5>
+        <a href="{% url 'Crear_Asignaturas' %}" class="btn btn-success btn-sm">
+            <i class="bi bi-plus-circle"></i> Nueva Asignatura
+        </a>
+    </div>
+    <div class="card-body">
+        {% if asignaturas %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Siglas</th>
+                        <th>Nombre</th>
+                        <th class="text-center">H/Clase Semanales</th>
+                        <th class="text-center">H/Clase Totales</th>
+                        <th>Horario</th>
+                        <th>Cátedra</th>
+                        {% if is_admin %}
+                        <th>Creador</th>
+                        {% endif %}
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asignatura in asignaturas %}
+                    <tr>
+                        <td>{{ asignatura.siglas }}</td>
+                        <td>{{ asignatura.nombre }}</td>
+                        <td class="text-center">{{ asignatura.clases_por_semana }}</td>
+                        <td class="text-center">{{ asignatura.clases_por_semestre }}</td>
+                        <td>
+                            {% if asignatura.horario_preferente == 'M' %}
+                            <span class="badge bg-info text-dark">Mañana</span>
+                            {% elif asignatura.horario_preferente == 'T' %}
+                            <span class="badge bg-warning text-dark">Tarde</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Ambos</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ asignatura.catedra }}</td>
+                        {% if is_admin %}
+                        <td>{{ asignatura.creador.username }}</td>
+                        {% endif %}
+                        <td>
+                            {% if is_admin or asignatura.creador == request.user %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'Editar_Asignaturas' asignatura.id %}" class="btn btn-warning">Editar</a>
+                                <a href="{% url 'Quitar_Asignaturas' asignatura.id %}" class="btn btn-danger">Eliminar</a>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No hay asignaturas registradas</div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    th.text-center, td.text-center {
+        text-align: center;
+    }
+</style>
+{% endblock %}

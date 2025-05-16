@@ -1,0 +1,269 @@
+{% extends 'Base/selector.html' %}
+
+{% load custom_tags %}
+{% load static %}
+
+{% block recursos %}
+<style>
+    /* Estilos generales */
+    .table-container {
+        overflow-x: auto;
+    }
+    
+    .tabla-horario {
+        min-width: 1000px;
+        width: 100%;
+    }
+    
+    .tabla-horario th {
+        background-color: #f8f9fa;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .tabla-horario td {
+        vertical-align: top;
+        min-width: 150px;
+    }
+    
+    /* Estilos para selects */
+    .form-control {
+        margin-bottom: 8px;
+        font-size: 0.875rem;
+    }
+    
+    /* Estilos para celdas con colisión */
+    .celda-colision {
+        background-color: #ffebee !important;
+        border: 2px solid #f44336 !important;
+        animation: pulse 0.6s infinite alternate;
+    }
+    
+    @keyframes pulse {
+        0% { background-color: #ffebee; }
+        100% { background-color: #ffcdd2; }
+    }
+    
+    /* Mensajes de error */
+    .mensaje-colision, .mensaje-error {
+        color: #d32f2f;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-top: 4px;
+        padding: 2px 5px;
+        background-color: #ffebee;
+        border-radius: 3px;
+        display: block;
+    }
+    
+    .select-error {
+        border: 1px solid #f44336 !important;
+    }
+    
+    /* Alerta flotante */
+    .alerta-flotante {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #f44336;
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        z-index: 10000;
+        text-align: center;
+        max-width: 90%;
+    }
+    
+    /* Grupo header */
+    .grupo-header {
+        background-color: #e9ecef;
+        padding: 10px 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        font-weight: bold;
+    }
+    
+    /* Estilos para la columna de profesores */
+    .columna-profesores {
+        width: 250px;
+        background-color: #f8f9fa;
+        vertical-align: top;
+    }
+    
+    .profesores-container {
+        padding: 10px;
+    }
+    
+    .profesor-item {
+        margin-bottom: 8px;
+    }
+    
+    .profesor-checkbox {
+        margin-right: 8px;
+    }
+    
+    .profesor-label {
+        font-size: 0.875rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .tabla-horario {
+            min-width: 1100px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .form-control {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+    }
+</style>
+
+<script>
+    window.CONFIG = {
+        turnosOcupados: {{ turnos_ocupados|safe }},
+        semanaActual: {{ balance.numero_semana }}
+    };
+</script>
+
+<div class="container-fluid">
+    {% if grupos %}
+    <form method="POST" id="form-horarios" action="{% url 'Crear_Horarios' balance.id %}">
+        {% csrf_token %}
+        
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+            <h1 class="mb-3 mb-md-0">Crear Horarios - Semana {{ balance.numero_semana }}</h1>
+            <div>
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-save"></i> Guardar Horarios
+                </button>
+                <a href="{% url 'Semanas' %}" class="btn btn-warning">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+
+        <input type="hidden" name="semana" value="{{ balance.numero_semana }}">
+        <input type="hidden" name="balance_id" value="{{ balance.id }}">
+
+        <div class="table-container">
+            {% for grupo in grupos %}
+            <div class="mb-5">
+                <div class="grupo-header">
+                    Grupo: {{ grupo.facultad }}{{ grupo.year }}0{{ grupo.grupo }}
+                    <input type="hidden" name="grupos[]" value="{{ grupo.id }}">
+                </div>
+
+                <table class="table table-bordered tabla-horario">
+                    <thead class="thead-light">
+                        <tr>
+                            <th width="10%">Hora</th>
+                            <th width="18%">Lunes</th>
+                            <th width="18%">Martes</th>
+                            <th width="18%">Miércoles</th>
+                            <th width="18%">Jueves</th>
+                            <th width="18%">Viernes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for clase in range_lista %}
+                        <tr>
+                            <td class="align-middle">
+                                {{ clase }}ª Clase<br>
+                                <small class="text-muted">
+                                    {% if clase == 1 %}8:00-9:20
+                                    {% elif clase == 2 %}9:30-10:50
+                                    {% elif clase == 3 %}11:00-12:20
+                                    {% elif clase == 4 %}12:30-1:50
+                                    {% elif clase == 5 %}2:00-3:20
+                                    {% elif clase == 6 %}3:30-4:50
+                                    {% endif %}
+                                </small>
+                            </td>
+                            {% for dia in range_list %}
+                            <td data-dia="{{ dia }}" data-clase="{{ clase }}">
+                                <select class="form-control mb-2" name="turnos[{{ grupo.id }}][{{ clase }}][{{ dia }}][asignatura]">
+                                    <option value="">Asignatura</option>
+                                    {% for asignatura in asignaturas %}
+                                    <option value="{{ asignatura.id }}">{{ asignatura.siglas }}</option>
+                                    {% endfor %}
+                                </select>
+                
+                                <select class="form-control mb-2" name="turnos[{{ grupo.id }}][{{ clase }}][{{ dia }}][tipo]">
+                                    <option value="">Tipo de clase</option>
+                                    {% for tipo in tipos_turno %}
+                                    <option value="{{ tipo.0 }}">{{ tipo.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                
+                                <select class="form-control local-selector" name="turnos[{{ grupo.id }}][{{ clase }}][{{ dia }}][local]">
+                                    <option value="">Local</option>
+                                    {% for local in locales %}
+                                    <option value="{{ local.id }}">
+                                        {{ local.tipo }}-{{ local.piso }}{% if local.numero < 10 %}0{% endif %}{{ local.numero }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex flex-column flex-md-row justify-content-between mt-4">
+            <a href="{% url 'Semanas' %}" class="btn btn-warning mb-3 mb-md-0">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Guardar Todos los Horarios
+            </button>
+        </div>
+    </form>
+    {% else %}
+    <div class="alert alert-info mt-4">
+        <div class="d-flex">
+            <i class="bi bi-info-circle-fill me-3" style="font-size: 1.5rem;"></i>
+            <div>
+                <h4 class="alert-heading">No hay grupos sin horarios</h4>
+                <p>Todos los grupos ya tienen horarios asignados para esta semana.</p>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">
+            <a href="{% url 'Semanas' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Volver al listado de semanas
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Mostrar solo mensajes de error -->
+    {% if messages %}
+    <div class="mt-4">
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+<script src="{% static 'javascript/edicion/choque.js' %}"></script>
+{% endblock %}

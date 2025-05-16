@@ -1,0 +1,206 @@
+{% extends 'Base/listar_semanas.html' %}
+{% load static %}
+
+{% block recursos %}
+{{ block.super }}
+<style>
+    .semana-texto {
+        color: #28a745;
+    }
+    .horario-table {
+        width: 100%;
+    }
+    .horario-table th, .horario-table td {
+        border: 2px solid #dee2e6;
+        padding: 8px;
+        vertical-align: middle;
+    }
+    .horario-table th {
+        background-color: #f8f9fa;
+    }
+    .celda-horario {
+        min-height: 80px;
+        position: relative;
+    }
+    .celda-contenido {
+        padding: 5px;
+    }
+    .separador {
+        border-top: 1px solid #dee2e6;
+        margin: 3px 0;
+    }
+    .badge-publicado {
+        background-color: #28a745;
+        color: white;
+    }
+    /* Estilos para la columna de profesores */
+    .profesores-columna {
+        vertical-align: top;
+        background-color: #f8f9fa;
+        width: 15%;
+    }
+    .profesor-item {
+        margin-bottom: 5px;
+        line-height: 1.2;
+    }
+    .profesor-badge {
+        word-break: break-word;
+        white-space: normal;
+        text-align: left;
+        display: inline-block;
+        background-color: #e2f0fd;
+        color: #0d6efd;
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        width: 100%;
+    }
+    .asignatura-text {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="row">
+        <main class="col-12 px-md-4 py-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1>Horarios para la Semana {{ balance.numero_semana }}</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="{% url 'Crear_Horarios' balance.id %}" class="btn btn-success">
+                        <i class="bi bi-plus-circle"></i> Crear Horario
+                    </a>
+                </div>
+            </div>
+
+            {% if horarios %}
+                {% for horario in horarios %}
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            Grupo {{ horario.grupo.facultad }}{{ horario.grupo.year }}0{{ horario.grupo.grupo }}
+                            <span class="badge bg-info text-dark semana-texto ms-2">
+                                Semana: {{ horario.semana }}
+                            </span>
+                            {% if horario.publicado %}
+                                <span class="badge badge-publicado ms-2">
+                                    <i class="bi bi-check-circle"></i> Publicado
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark ms-2">
+                                    <i class="bi bi-exclamation-triangle"></i> No publicado
+                                </span>
+                            {% endif %}
+                        </h5>
+                        
+                        {% if is_admin or horario.creador == request.user %}
+                        <div class="btn-group">
+                            {% if not horario.publicado %}
+                                <a href="{% url 'Publicar_Horarios' horario.id %}" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check-circle"></i> Publicar
+                                </a>
+                            {% else %}
+                                <a href="{% url 'Publicar_Horarios' horario.id %}" class="btn btn-sm btn-secondary">
+                                    <i class="bi bi-x-circle"></i> Despublicar
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'Editar_Horarios' horario.id %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <a href="{% url 'Asignar_Profesores' horario.id %}" class="btn btn-sm btn-info">
+                                <i class="bi bi-people"></i> Asignar Profesores
+                            </a>
+                            <a href="{% url 'Eliminar_Horarios' horario.id %}" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered horario-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Turno</th>
+                                        <th scope="col">Hora</th>
+                                        <th scope="col">Lunes</th>
+                                        <th scope="col">Martes</th>
+                                        <th scope="col">Miércoles</th>
+                                        <th scope="col">Jueves</th>
+                                        <th scope="col">Viernes</th>
+                                        <th scope="col">Profesores</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for clase in range_list %}
+                                    <tr>
+                                        <td>{{ clase }}ª</td>
+                                        <td>
+                                            {% if clase == 1 %}8:00-9:20
+                                            {% elif clase == 2 %}9:30-10:50
+                                            {% elif clase == 3 %}11:00-12:20
+                                            {% elif clase == 4 %}12:30-1:50
+                                            {% elif clase == 5 %}2:00-3:20
+                                            {% elif clase == 6 %}3:30-4:50
+                                            {% endif %}
+                                        </td>
+                                        {% for dia in range_lista %}
+                                        <td class="celda-horario">
+                                            {% with turno=None %}
+                                                {% for t in horario.turnos.all %}
+                                                    {% if t.clase == clase and t.dia == dia %}
+                                                        {% with turno=t %}
+                                                        <div class="celda-contenido">
+                                                            <div>{{ turno.asignatura.siglas }} - {{ turno.tipo }}</div>
+                                                            <div class="separador"></div>
+                                                            <div>
+                                                                {{ turno.local.tipo }}-{{ turno.local.piso }}{% if turno.local.numero < 10 %}0{% endif %}{{ turno.local.numero }}
+                                                            </div>
+                                                        </div>
+                                                        {% endwith %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endwith %}
+                                        </td>
+                                        {% endfor %}
+                                        <td class="profesores-columna">
+                                            {% if clase == 1 %}  <!-- Solo mostrar en primera fila -->
+                                                {% if horario.profesores.all %}
+                                                    {% for profesor in horario.profesores.all %}
+                                                        <div class="profesor-item">
+                                                            <div class="profesor-badge">
+                                                                {{ profesor.nombre }}
+                                                                <div class="asignatura-text">
+                                                                    {{ profesor.asignatura.siglas|default:"Sin asignatura" }} - {{ profesor.tipo }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                {% else %}
+                                                    <small class="text-muted">No hay profesores asignados</small>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info text-center py-4">
+                    <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
+                    <h4 class="mt-3">No hay horarios disponibles</h4>
+                    <p class="mb-0">Puedes crear un nuevo horario usando el botón superior.</p>
+                </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+{% endblock %}

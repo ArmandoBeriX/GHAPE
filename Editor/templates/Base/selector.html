@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Gestor de Horarios Académicos para Profesores y Estudiantes - FIO">
+    <title>Menú de Selección</title>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: rgb(0, 2, 89);
+            --accent-color: rgb(231, 163, 18);
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar-custom {
+            background-color: var(--primary-bg) !important;
+            flex-shrink: 0;
+        }
+        .navbar-brand-custom {
+            color: var(--accent-color) !important;
+            max-width: 70%;
+        }
+        .main-content {
+            flex: 1;
+        }
+        /* Estilos específicos solo para las cards del selector */
+        .selector-card {
+            transition: all 0.3s ease;
+            height: 100%;
+            border: none;
+            overflow: hidden;
+        }
+        .selector-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .selector-card img {
+            object-fit: cover;
+            height: 180px;
+            width: 100%;
+        }
+        .user-info {
+            color: rgb(80, 184, 37);
+            white-space: nowrap;
+            margin-right: 0.5rem;
+        }
+        .navbar-collapse.show .user-info {
+            white-space: normal;
+            max-width: 100%;
+        }
+        @media (max-width: 768px) {
+            .navbar-brand-custom {
+                font-size: 1rem;
+            }
+            .navbar:not(.show) .user-info {
+                max-width: 120px;
+                display: inline-block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                vertical-align: middle;
+            }
+            .selector-card img {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar Responsivo -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand navbar-brand-custom text-truncate" href="https://eva.uci.cu/">
+                Gestor de Horarios Académicos para Profesores y Estudiantes - FIO
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="ms-auto d-flex align-items-center">
+                    <span class="user-info">Usuario: {{ user.username }}</span>
+                    <a href="{% url 'Salir' %}" class="btn btn-danger btn-sm">Salir</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bloque principal (para que recursos.html pueda extenderse sin conflictos) -->
+    <main class="main-content">
+        {% block recursos %}
+        <!-- Contenido por defecto (selector de opciones) -->
+        <div class="container py-4">
+            <div class="row g-4 justify-content-center">
+                <!-- Card 1 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="{% url 'Semanas' %}" class="card selector-card text-decoration-none">
+                        <img src="{% static 'images/GestionHorario.jpg' %}" class="img-fluid" alt="Gestión de Horarios">
+                        <div class="card-body text-center bg-warning">
+                            <h5 class="card-title m-0">Gestionar Horarios</h5>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="col-12 col-md-6 col-lg-4">
+                    <a href="{% url 'Recursos' %}" class="card selector-card text-decoration-none">
+                        <img src="{% static 'images/GestionRecursos.jpg' %}" class="img-fluid" alt="Gestión de Recursos">
+                        <div class="card-body text-center bg-success text-white">
+                            <h5 class="card-title m-0">Gestionar Recursos</h5>
+                        </div>
+                    </a>
+                </div>
+                
+                <!-- Card 3 (Condicional) -->
+                {% with groups=request.user.groups.all %}
+                    {% if 'Administrador' in groups|join:", " or 'Profesor-Año' in groups|join:", " and 'Administrador' in groups|join:", " %}
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <a href="{% url 'Listar_Usuarios' %}" class="card selector-card text-decoration-none">
+                            <img src="{% static 'images/GestionDifusion.jpg' %}" class="img-fluid" alt="Administración de Usuarios">
+                            <div class="card-body text-center bg-primary text-white">
+                                <h5 class="card-title m-0">Administrar Usuarios</h5>
+                            </div>
+                        </a>
+                    </div>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        {% endblock %}
+    </main>
+
+    <!-- Scripts -->
+    <script src="{% static 'js/jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        // Efecto hover mejorado para móviles (solo aplica a cards del selector)
+        document.querySelectorAll('.selector-card').forEach(card => {
+            card.addEventListener('touchstart', function() {
+                this.classList.add('active');
+            });
+            card.addEventListener('touchend', function() {
+                this.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

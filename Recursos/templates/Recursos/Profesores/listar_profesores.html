@@ -1,0 +1,81 @@
+{% extends 'Recursos/recursos.html' %}
+{% load static %}
+
+{% block contenido_recurso %}
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lista de Profesores</h5>
+        <a href="{% url 'Crear_Profesores' %}" class="btn btn-success btn-sm">
+            <i class="bi bi-person-plus"></i> Nuevo Profesor
+        </a>
+    </div>
+    <div class="card-body">
+        {% if profesores %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Asignatura</th>
+                        <th>Tipo</th>
+                        <th>Grupos Asignados</th>
+                        {% if is_admin %}
+                        <th>Creador</th>
+                        {% endif %}
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for profesor in profesores %}
+                    <tr>
+                        <td>{{ profesor.nombre }}</td>
+                        <td>{{ profesor.asignatura.siglas|default:"-" }}</td>
+                        <td>{{ profesor.get_tipo_display }}</td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                {% for grupo in profesor.get_grupos_objects %}
+                                <span class="badge bg-primary">{{ grupo }}</span>
+                                {% empty %}
+                                <span class="text-muted">Sin grupos asignados</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        {% if is_admin %}
+                        <td>{{ profesor.creador.username }}</td>
+                        {% endif %}
+                        <td>
+                            {% if is_admin or profesor.creador == request.user %}
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'Editar_Profesores' profesor.id %}" class="btn btn-warning">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="{% url 'Quitar_Profesores' profesor.id %}" class="btn btn-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No hay profesores registrados</div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    .table td, .table th {
+        vertical-align: middle;
+    }
+</style>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+{% endblock %}

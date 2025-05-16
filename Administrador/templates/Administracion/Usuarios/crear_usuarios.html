@@ -1,0 +1,238 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gestor de Horarios Académicos para Profesores y Estudiantes">
+    <title>Agregar Usuario</title>
+    <style>
+        :root {
+            --primary-bg: rgb(0, 2, 89);
+            --secondary-color: rgb(231, 163, 18);
+            --form-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        body {
+            background-color: var(--primary-bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--form-shadow);
+            overflow: hidden;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .auth-header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .auth-body {
+            padding: 2rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .form-control {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+        }
+        
+        .btn-submit {
+            background-color: var(--secondary-color);
+            border: none;
+            padding: 0.75rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-submit:hover {
+            background-color: #d39e00;
+            transform: translateY(-2px);
+        }
+        
+        .nav-brand {
+            color: var(--secondary-color) !important;
+            font-weight: 700;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .auth-body {
+                padding: 1.5rem;
+            }
+            
+            .main-content {
+                padding: 1rem 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .auth-body {
+                padding: 1.25rem;
+            }
+            
+            .auth-header h2 {
+                font-size: 1.5rem;
+            }
+        }
+        
+        /* Custom form field styling */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .help-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container">
+            <a class="navbar-brand nav-brand" href="https://eva.uci.cu/">
+                Gestor de Horarios Académicos
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="ms-auto">
+                    <a href="{% url 'Listar_Usuarios' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Volver
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="auth-card">
+                        <div class="auth-header">
+                            <h2 class="mb-0">Registro de Usuario</h2>
+                        </div>
+                        <div class="auth-body">
+                            <form method="POST" novalidate>
+                                {% csrf_token %}
+                                
+                                {% for field in form %}
+                                <div class="form-group">
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                        {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                                    </label>
+                                    
+                                    {{ field }}
+                                    
+                                    {% if field.help_text %}
+                                        <small class="help-text">{{ field.help_text }}</small>
+                                    {% endif %}
+                                    
+                                    {% for error in field.errors %}
+                                        <div class="error-message">{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                                {% endfor %}
+                                
+                                <div class="d-grid gap-2 mt-4">
+                                    <button type="submit" class="btn btn-submit btn-lg">
+                                        Registrar Usuario
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Mensajes de retroalimentación -->
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} mt-4" role="alert">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if 'ok' in request.GET %}
+                    <div class="alert alert-success mt-4" role="alert">
+                        <i class="bi bi-check-circle-fill"></i> Usuario creado exitosamente en el sistema
+                    </div>
+                    {% endif %}
+                    
+                    {% if 'error' in request.GET %}
+                    <div class="alert alert-danger mt-4" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Error: Alguno de los campos está incorrecto o vacío
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script>
+        // Mejoras para la experiencia de usuario
+        document.addEventListener('DOMContentLoaded', function() {
+            // Agregar clases adicionales a los selects
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.classList.add('form-select');
+            });
+            
+            // Manejo de errores del servidor
+            const errorFields = document.querySelectorAll('.is-invalid');
+            errorFields.forEach(field => {
+                field.classList.add('is-invalid');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback';
+                errorDiv.textContent = field.validationMessage;
+                field.parentNode.appendChild(errorDiv);
+            });
+            
+            // Validación en tiempo real
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.checkValidity()) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

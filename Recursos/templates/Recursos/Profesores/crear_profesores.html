@@ -1,0 +1,139 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<div class="container-fluid mt-3">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Nuevo Profesor</h5>
+                    <a href="{% url 'Listar_Profesores' %}" class="btn btn-sm btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                    <form method="POST" id="profesor-form">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            {{ form.nombre.label_tag }}
+                            {{ form.nombre }}
+                        </div>
+                        
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.asignatura.label_tag }}
+                                    {{ form.asignatura }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form.tipo.label_tag }}
+                                    {{ form.tipo }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="grupos-input" class="form-label">Grupos asignados</label>
+                            <input type="hidden" name="grupos_input" id="grupos-input" 
+                                   value="{{ form.grupos_input.value|default_if_none:'' }}">
+                            <div class="border p-2 rounded" style="max-height: 200px; overflow-y: auto;">
+                                {% for grupo in grupos_disponibles %}
+                                    <span class="badge bg-secondary me-1 mb-1 grupo-badge" 
+                                          data-id="{{ grupo.id }}"
+                                          style="cursor: pointer; font-size: 0.9rem;">
+                                        {{ grupo }}
+                                    </span>
+                                {% empty %}
+                                    <span class="text-muted">No hay grupos disponibles</span>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">Haz clic en los grupos para asignarlos al profesor</small>
+                        </div>
+
+                        {% if is_admin %}
+                        <div class="mb-3">
+                            <label for="creador">Creador:</label>
+                            <select name="creador" id="creador" class="form-select">
+                                {% for user in users %}
+                                    <option value="{{ user.id }}">{{ user.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-save"></i> Registrar Profesor
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-octagon"></i> Debes iniciar sesión para agregar profesores
+                    </div>
+                    {% endif %}
+
+                    {% if 'ok' in request.GET %}
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-check-circle"></i> Profesor registrado exitosamente
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const gruposInput = document.getElementById('grupos-input');
+    const grupoBadges = document.querySelectorAll('.grupo-badge');
+    
+    // Cargar selecciones existentes (para edición)
+    const selectedIds = gruposInput.value ? gruposInput.value.split(',') : [];
+    
+    // Resaltar badges seleccionados inicialmente
+    grupoBadges.forEach(badge => {
+        const grupoId = badge.getAttribute('data-id');
+        if (selectedIds.includes(grupoId)) {
+            badge.classList.remove('bg-secondary');
+            badge.classList.add('bg-primary');
+        }
+        
+        // Manejar clic en los badges
+        badge.addEventListener('click', function() {
+            const grupoId = this.getAttribute('data-id');
+            let currentIds = gruposInput.value ? gruposInput.value.split(',') : [];
+            
+            if (currentIds.includes(grupoId)) {
+                // Si ya está, lo quitamos
+                currentIds = currentIds.filter(id => id !== grupoId);
+                this.classList.remove('bg-primary');
+                this.classList.add('bg-secondary');
+            } else {
+                // Si no está, lo añadimos
+                currentIds.push(grupoId);
+                this.classList.remove('bg-secondary');
+                this.classList.add('bg-primary');
+            }
+            
+            // Actualizar el campo hidden
+            gruposInput.value = currentIds.join(',');
+        });
+    });
+    
+    // Validación del formulario
+    document.getElementById('profesor-form').addEventListener('submit', function(e) {
+        if (!gruposInput.value.trim() && !confirm('¿Estás seguro de crear un profesor sin asignar a ningún grupo?')) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

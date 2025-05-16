@@ -1,0 +1,61 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Grupo</title>
+    <style>
+        body { background-color: rgb(0, 2, 89); }
+        .idf-badge { font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4">
+        <div class="container">
+            <a class="navbar-brand text-warning" href="https://eva.uci.cu/">Gestor de Horarios</a>
+            <a href="{% url 'Listar_Grupos' %}" class="btn btn-success ms-auto">Cancelar</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                {% if grupo.creador == request.user %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center">
+                        <h4 class="card-title mb-4">Confirmar Eliminación</h4>
+                        <div class="alert alert-danger">
+                            ¿Estás seguro de eliminar este grupo?
+                        </div>
+                        
+                        <div class="text-start mb-4">
+                            <p><strong>Facultad:</strong> {{ grupo.facultad }}</p>
+                            <p><strong>Año:</strong> {{ grupo.year }}</p>
+                            <p><strong>Grupo:</strong> {{ grupo.grupo }}</p>
+                            <p><strong>IDF:</strong> <span class="badge bg-primary idf-badge">{{ grupo.facultad }}{{ grupo.year }}0{{ grupo.grupo }}</span></p>
+                        </div>
+                        
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <a href="{% url 'Listar_Grupos' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                                <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="alert alert-danger text-center">
+                    No tienes permiso para eliminar este grupo.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Local</title>
+    <style>
+        body { background-color: rgb(0, 2, 89); }
+        .local-code { font-family: monospace; font-size: 1.2rem; }
+        .badge { font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4">
+        <div class="container">
+            <a class="navbar-brand text-warning" href="https://eva.uci.cu/">Gestor de Horarios</a>
+            <a href="{% url 'Listar_Locales' %}" class="btn btn-success ms-auto">Cancelar</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center">
+                        <h4 class="card-title mb-4">Confirmar Eliminación</h4>
+                        <div class="alert alert-danger">
+                            ¿Estás seguro de eliminar este local?
+                        </div>
+                        
+                        <div class="text-start mb-4">
+                            <p><strong>Tipo:</strong> 
+                                <span class="badge bg-secondary">
+                                    {{ local.get_tipo_display }}
+                                </span>
+                            </p>
+                            <p><strong>Piso:</strong> {{ local.piso }}</p>
+                            <p><strong>Número:</strong> {{ local.numero }}</p>
+                            <p><strong>Capacidad:</strong> {{ local.capacidad }} personas</p>
+                            <p><strong>Código:</strong> 
+                                <span class="local-code">
+                                    {{ local.tipo }}-{{ local.piso }}{{ local.numero|stringformat:"02d" }}
+                                </span>
+                            </p>
+                        </div>
+                        
+                        <p class="text-danger fw-bold mb-4">
+                            Esta acción no se puede deshacer
+                        </p>
+                        
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                                <a href="{% url 'Listar_Locales' %}" class="btn btn-secondary me-md-2">Cancelar</a>
+                                <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+
+.hidden { display: none; }
+/* Optimización móvil */
+@media (max-width: 768px) {
+    .navbar-brand { 
+        font-size: 1rem; /* Texto más pequeño en móviles */
+    }
+    .table td, .table th {
+        padding: 0.3rem; /* Celdas más compactas */
+        font-size: 0.8rem;
+    }
+}
+.table-active {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    transition: background-color 0.3s ease;
+}
+.separador {
+    border-top: 1px solid #dee2e6;
+    margin: 3px 0;
+}

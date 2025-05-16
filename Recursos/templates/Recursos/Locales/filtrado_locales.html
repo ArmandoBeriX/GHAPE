@@ -1,0 +1,156 @@
+{% extends 'Base/selector.html' %}
+{% load static %}
+
+{% block recursos %}
+<div class="container-fluid">
+    <div class="row">
+        <main class="col-12 px-md-4 py-3">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Ocupación de Locales por Semana</h1>
+                <a href="{% url 'Listar_Locales' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Volver al Listado de Locales
+                </a>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Seleccionar Semana</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-8">
+                            <select name="semana" class="form-select" required>
+                                <option value="">Seleccione una semana...</option>
+                                {% for balance in balances %}
+                                <option value="{{ balance.numero_semana }}" {% if semana_seleccionada == balance.numero_semana %}selected{% endif %}>
+                                    Semana {{ balance.numero_semana }} ({{ balance.dia_inicio|date:"d/m/Y" }} - {{ balance.dia_fin|date:"d/m/Y" }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-search"></i> Mostrar Ocupación
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if semana_seleccionada %}
+            <div class="card shadow-sm">
+                <div class="card-header text-white" style="background-color: rgb(0, 2, 89);">
+                    <h5 class="card-title mb-0" style="color: rgb(231, 163, 18);">
+                        <i class="bi bi-calendar-week"></i> Ocupación de Locales - Semana {{ semana_seleccionada }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if ocupaciones %}
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col">Turno</th>
+                                    <th scope="col">Hora</th>
+                                    <th scope="col">Lunes</th>
+                                    <th scope="col">Martes</th>
+                                    <th scope="col">Miércoles</th>
+                                    <th scope="col">Jueves</th>
+                                    <th scope="col">Viernes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for clase in "123456" %}
+                                <tr>
+                                    <td class="fw-bold">{{ clase }}ª</td>
+                                    <td>
+                                        {% if clase == "1" %}8:00-9:20
+                                        {% elif clase == "2" %}9:30-10:50
+                                        {% elif clase == "3" %}11:00-12:20
+                                        {% elif clase == "4" %}12:30-1:50
+                                        {% elif clase == "5" %}2:00-3:20
+                                        {% elif clase == "6" %}3:30-4:50
+                                        {% endif %}
+                                    </td>
+                                    {% for dia in "12345" %}
+                                    <td>
+                                        {% for turno in ocupaciones %}
+                                            {% if turno.clase == clase|add:0 and turno.dia == dia|add:0 %}
+                                                <div class="mb-1">
+                                                    <span class="badge bg-secondary">
+                                                        {{ turno.local.tipo }}-{{ turno.local.piso }}{{ turno.local.numero|stringformat:"02d" }}
+                                                    </span>
+
+                                                   
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle-fill"></i> No hay locales ocupados en esta semana.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+<style>
+    /* Estilos mejorados para la tabla */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .table-bordered {
+        border: 2px solid #dee2e6; /* Borde más grueso para la tabla */
+    }
+    
+    .table th, .table td {
+        border: 1px solid #6c757d; /* Líneas más oscuras (gris oscuro) */
+        padding: 0.5rem; /* Espaciado interno mejorado */
+    }
+    
+    .table th {
+        background-color: #f8f9fa;
+        position: sticky;
+        top: 0;
+        border-bottom: 2px solid #495057; /* Línea inferior más gruesa para los headers */
+    }
+    
+    .table-light th {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+    
+    /* Estilo para las celdas cuando hay hover */
+    .table-hover tbody tr:hover td {
+        background-color: rgba(0, 2, 89, 0.05); /* Color institucional con transparencia */
+    }
+    
+    /* Estilo para los badges de locales */
+    .badge {
+        font-size: 0.85rem;
+        padding: 0.35em 0.65em;
+        margin-bottom: 2px;
+        display: inline-block;
+    }
+    
+    /* Mejor contraste para el texto en celdas */
+    .table td {
+        color: #212529;
+    }
+</style>
+{% endblock %}
